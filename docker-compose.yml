@@ -9,7 +9,7 @@ services:
     container_name: opensid-app
     restart: unless-stopped
     ports:
-      - "8443:80"
+      - "6000:80"
     volumes:
       - ./desa:/var/www/html/desa
       - ./storage:/var/www/html/storage
@@ -35,7 +35,7 @@ services:
       MYSQL_USER: ${DB_USERNAME:-opensid}
       MYSQL_PASSWORD: ${DB_PASSWORD:-opensid123}
     ports:
-      - "3307:3306"
+      - "3309:3306"
     volumes:
       - opensid-db-data:/var/lib/mysql
     command: >
