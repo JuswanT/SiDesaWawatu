@@ -29,7 +29,7 @@ echo "[2/6] Creating Nginx configuration (HTTP)..."
 cat > "$NGINX_CONF" << 'NGINX_EOF'
 server {
     listen 80;
-    server_name desawawatu.web.id www.desawawatu.web.id;
+    server_name desawawatu.web.id;
 
     client_max_body_size 50M;
 
@@ -88,7 +88,7 @@ echo "      Domain: $DOMAIN"
 echo "      Email:  $EMAIL"
 echo ""
 
-certbot --nginx -d "$DOMAIN" -d "www.$DOMAIN" --non-interactive --agree-tos --email "$EMAIL" --redirect
+certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos --email "$EMAIL" --redirect
 
 # 5. Setup auto-renewal
 echo ""
@@ -108,7 +108,6 @@ echo "  Proxy   : 127.0.0.1:6000 (Docker OpenSID)"
 echo ""
 echo "  Pastikan:"
 echo "  1. DNS A record $DOMAIN → 210.87.89.81"
-echo "  2. DNS A record www.$DOMAIN → 210.87.89.81"
 echo "  3. Docker OpenSID sudah berjalan di port 6000"
 echo ""
 echo "  Test renewal: sudo certbot renew --dry-run"
