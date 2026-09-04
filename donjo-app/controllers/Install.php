@@ -187,9 +187,6 @@ class Install extends CI_Controller
     public function migrations()
     {
         // disable install
-        if (file_exists(LOKASI_CONFIG_DESA . 'database.php')) {
-            show_404();
-        }
 
         $this->load->database($this->config_database());
 
