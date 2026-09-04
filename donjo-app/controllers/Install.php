@@ -101,7 +101,7 @@ class Install extends CI_Controller
     public function folders()
     {
         // disable install
-        if (file_exists(DESAPATH)) {
+        if (file_exists(LOKASI_CONFIG_DESA . 'database.php')) {
             show_404();
         }
 
@@ -120,7 +120,7 @@ class Install extends CI_Controller
     public function database()
     {
         // disable install
-        if (file_exists(DESAPATH)) {
+        if (file_exists(LOKASI_CONFIG_DESA . 'database.php')) {
             show_404();
         }
 
@@ -187,7 +187,7 @@ class Install extends CI_Controller
     public function migrations()
     {
         // disable install
-        if (file_exists(DESAPATH)) {
+        if (file_exists(LOKASI_CONFIG_DESA . 'database.php')) {
             show_404();
         }
 
