@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     libicu-dev \
     libgmp-dev \
+    libtidy-dev \
     zip \
     unzip \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
@@ -27,6 +28,7 @@ RUN apt-get update && apt-get install -y \
         bcmath \
         opcache \
         exif \
+        tidy \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
