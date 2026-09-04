@@ -73,13 +73,10 @@ Options -Indexes
 # FOR LOCAL DEVELOPMENT (if you don't have SSL certificate):
 # Comment-out these 7 lines below (76-82):
 
-# Detect Cloudflare / Nginx SSL proxy (prevent redirect loops)
-RewriteCond %{HTTP:CF-Visitor} ^{\"scheme\":\"https\"}$ [OR]
-RewriteCond %{HTTP:X-Forwarded-Proto} =https
-RewriteRule .* - [E=HTTPS:on]
-
 # Enforce HTTPS redirect
 RewriteCond %{HTTPS} !=on
+RewriteCond %{HTTP:X-Forwarded-Proto} !https [NC]
+RewriteCond %{HTTP:CF-Visitor} !^{\"scheme\":\"https\"}$ [NC]
 RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
 # ============================================================================
