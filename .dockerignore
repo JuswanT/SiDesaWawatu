@@ -1,0 +1,8 @@
+.git
+.github
+desa/
+storage/
+backup_inkremental/
+vendor/
+node_modules/
+.env

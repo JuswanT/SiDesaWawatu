@@ -90,6 +90,12 @@ class Pengurus extends Admin_Controller
         view('admin.bumindes.index', $data);
     }
 
+    public function clear(): void
+    {
+        redirect('pengurus');
+    }
+
+
     public function datatables()
     {
         if ($this->input->is_ajax_request()) {

@@ -59,7 +59,7 @@ services:
     container_name: opensid-phpmyadmin
     restart: unless-stopped
     ports:
-      - "8081:80"
+      - "8888:80"
     environment:
       PMA_HOST: db
       PMA_PORT: 3306
