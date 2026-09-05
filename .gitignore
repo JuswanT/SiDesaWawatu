@@ -13,6 +13,7 @@ sftp-config.json
 mitra
 generate-route.php
 index.php
+.env
 
 # Abaikan file cache milik phpintel (plugin sublime text)
 .phpintel/*
