@@ -44,6 +44,9 @@ WORKDIR /var/www/html
 # Copy application files
 COPY . /var/www/html/
 
+# Install PHP dependencies
+RUN composer install --no-dev --optimize-autoloader
+
 # Copy htaccess
 RUN cp htaccess.apache.txt .htaccess
 
