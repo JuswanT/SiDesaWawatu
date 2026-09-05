@@ -73,7 +73,7 @@ class Pengguna extends Admin_Controller
             if (! empty($userData->id_telegram) && $botUsername) {
                 $isChatStarted = $this->otpService->verifyTelegramChatId($userData->id_telegram);
             }
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             $telegramError = true;
         }
 
@@ -161,7 +161,7 @@ class Pengguna extends Admin_Controller
 
         try {
             $request->user()->sendEmailVerificationNotification();
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             log_message('error', $e->getMessage());
 
             return redirect_with('error', 'Tidak berhasil mengirim verifikasi email', 'pengguna');
@@ -197,7 +197,7 @@ class Pengguna extends Admin_Controller
                 'message' => 'sucess',
                 'data'    => $id_telegram,
             ]);
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return json([
                 'status'  => false,
                 'message' => $e->getMessage(),
