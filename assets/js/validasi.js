@@ -316,11 +316,8 @@ $(document).ready(function() {
 		return this.optional(element) || valid;
 	}, "Hanya boleh berisi karakter numerik dan spasi");
 
-	$('.bilangan_spasi').each(function() {
-		$(this).rules("add",
-			{
-				bilangan_spasi: true,
-			});
+	$.validator.addClassRules("bilangan_spasi", {
+		bilangan_spasi: true
 	});
 	
 	var pesanSandi = (typeof SYARAT_SANDI == 'undefined') ? '' : SYARAT_SANDI;
@@ -333,11 +330,8 @@ $(document).ready(function() {
 	}, pesanSandi);
 	
 
-	$('.pwdLengthNist').each(function() {
-		$(this).rules("add",
-			{
-				pwdLengthNist: true,
-			});
+	$.validator.addClassRules("pwdLengthNist", {
+		pwdLengthNist: true
 	});
 
 	// Ketentuan kata sandi sesuai US National Institute of Standards and Technology (NIST)
