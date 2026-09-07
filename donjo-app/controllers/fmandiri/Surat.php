@@ -294,7 +294,7 @@ class Surat extends Mandiri_Controller
             $penduduk   = auth('penduduk')->user();
 
             // Dispatch event to send notifications
-            event(new PermohonanSuratSubmitted($permohonan, $penduduk, $surat));
+            event(new PermohonanSuratSubmitted($permohonan, $penduduk->penduduk, $surat));
         }
 
         $this->session->unset_userdata('data_permohonan');
