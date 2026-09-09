@@ -363,7 +363,7 @@ class Surat extends Mandiri_Controller
 
         // Cek ada file
         if (file_exists(FCPATH . LOKASI_ARSIP . $surat->nama_surat)) {
-            return ambilBerkas($surat->nama_surat, $this->controller, null, LOKASI_ARSIP, true);
+            return ambilBerkas($surat->nama_surat, 'layanan-mandiri/arsip-surat', null, LOKASI_ARSIP, true);
         }
         echo 'Berkas tidak ditemukan';
     }
