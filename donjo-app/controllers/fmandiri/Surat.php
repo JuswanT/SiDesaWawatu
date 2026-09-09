@@ -256,7 +256,7 @@ class Surat extends Mandiri_Controller
             'url'          => $surat->url_surat,
             'individu'     => $penduduk->toArray(),
             'anggota'      => $penduduk?->keluarga?->anggota?->toArray(),
-            'surat_url'    => rtrim($_SERVER['REQUEST_URI'], '/clear'),
+            'surat_url'    => preg_replace('#/clear$#i', '', (string) $_SERVER['REQUEST_URI']),
             'form_action'  => route('layanan-mandiri.surat.kirim', $permohonan['id']),
             'cek_anjungan' => $this->cek_anjungan,
             'mandiri'      => 1,
