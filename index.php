@@ -1,5 +1,4 @@
 <?php
-if(isset($_GET['cek_host'])) { echo 'HOST: ' . ($_SERVER['HTTP_HOST'] ?? 'NONE'); exit; }
 
 /*
  *
