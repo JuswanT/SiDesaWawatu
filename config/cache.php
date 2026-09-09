@@ -83,5 +83,5 @@ return [
     |
     */
 
-    'prefix' => Str::slug('opensid', '_') . '_cache_',
+    'prefix' => Str::slug('opensid', '_') . '_cache_' . str_replace('.', '_', $_SERVER['HTTP_HOST'] ?? 'default') . '_',
 ];

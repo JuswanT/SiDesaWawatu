@@ -1,9 +1,10 @@
 <?php
+define('FCPATH', __DIR__ . DIRECTORY_SEPARATOR);
 require 'vendor/autoload.php';
-$funcs = get_defined_functions();
-foreach ($funcs['user'] as $f) {
-    if (strpos($f, 'getroutes') !== false) {
-        $r = new ReflectionFunction($f);
-        echo $r->getFileName() . ':' . $r->getStartLine() . "\n";
-    }
+$app = require 'bootstrap/app.php';
+try {
+    $f = new ReflectionFunction('identitas');
+    echo "\n== FOUND ==\n" . $f->getFileName() . "\n";
+} catch (Exception $e) {
+    echo "\n== NOT FOUND ==\n";
 }
