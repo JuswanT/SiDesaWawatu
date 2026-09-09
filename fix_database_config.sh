@@ -1,6 +1,6 @@
 #!/bin/bash
 echo "======================================================"
-echo "  MENGHAPUS & MEMBUAT ULANG CONFIG DATABASE TIAP DESA"
+echo "  MEMPERBAIKI CONFIG DATABASE (MENGEMBALIKAN KREDENSIAL)"
 echo "======================================================"
 
 docker exec opensid-app php -r '
@@ -11,7 +11,6 @@ foreach($folders as $dir) {
     
     // Nama database = opensid_ + (nama setelah desa_)
     $db_name = "opensid_" . substr($desa, 5);
-    echo "Target Database: $db_name\n";
     
     $config_dir = $dir . "/config";
     if (!is_dir($config_dir)) {
@@ -20,15 +19,20 @@ foreach($folders as $dir) {
     
     $db_file = $config_dir . "/database.php";
     
-    // HAPUS dan BUAT ULANG secara bersih (overwrite)
-    $content = "<?php\n// Pengaturan khusus untuk $desa\n\$db[\x27default\x27][\x27database\x27] = \x27$db_name\x27;\n";
+    // Kembalikan konfigurasi penuh untuk environment Docker
+    $content = "<?php\n";
+    $content .= "// Pengaturan khusus untuk $desa\n";
+    $content .= "\$db[\x27default\x27][\x27hostname\x27] = \x27db\x27;\n";
+    $content .= "\$db[\x27default\x27][\x27username\x27] = \x27opensid\x27;\n";
+    $content .= "\$db[\x27default\x27][\x27password\x27] = \x27network2024\x27;\n";
+    $content .= "\$db[\x27default\x27][\x27database\x27] = \x27$db_name\x27;\n";
+    $content .= "\$db[\x27default\x27][\x27port\x27] = 3306;\n";
     
     file_put_contents($db_file, $content);
-    echo "  ✅ File database.php berhasil dibuat ulang secara bersih!\n\n";
+    echo "  ✅ Kredensial database.php berhasil dipulihkan & diperbarui!\n\n";
 }
 '
 
 echo "======================================================"
 echo "✅ SEMUA CONFIG DATABASE DESA BERHASIL DIPERBAIKI"
 echo "======================================================"
-echo "Silakan jalankan ulang 'bash check_all_db.sh' untuk memastikan."
