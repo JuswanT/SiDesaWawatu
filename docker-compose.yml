@@ -12,6 +12,10 @@ services:
       - "6000:80"
     volumes:
       - ./desa:/var/www/html/desa
+      - ./desa_wawatu:/var/www/html/desa_wawatu
+      - ./desa_matawawatu:/var/www/html/desa_matawawatu
+      - ./desa_tanjungtiram:/var/www/html/desa_tanjungtiram
+      - ./desa_lalowaru:/var/www/html/desa_lalowaru
       - ./storage:/var/www/html/storage
       - ./backup_inkremental:/var/www/html/backup_inkremental
     environment:
