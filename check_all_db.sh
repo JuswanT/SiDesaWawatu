@@ -1,58 +1,44 @@
 #!/bin/bash
 echo "======================================================"
-echo "  DIAGNOSTIK MULTISITE & DATABASE OPENSID"
+echo "  DIAGNOSTIK MULTISITE & DATABASE OPENSID (FINAL)"
 echo "======================================================"
 
-echo "[1] Memeriksa Routing Domain di constants.php..."
+# Kita gunakan PDO dari dalam opensid-app untuk mengecek database!
 docker exec opensid-app php -r '
-$f = "/var/www/html/donjo-app/config/constants.php";
-$c = file_get_contents($f);
-$start = strpos($c, "// Menentukan direktori desa berdasarkan domain");
-if ($start !== false) {
-    $end = strpos($c, "// Fallback to default", $start);
-    echo substr($c, $start, $end - $start) . "\n";
-} else {
-    echo "Gagal menemukan blok routing.\n";
+$folders = glob("/var/www/html/desa_*", GLOB_ONLYDIR);
+$db_pass = "network2024"; // Sesuai dengan test_db.php sebelumnya
+
+foreach($folders as $dir) {
+    $desa = basename($dir);
+    echo "Folder: $desa\n";
+    $db_file = $dir . "/config/database.php";
+    if (file_exists($db_file)) {
+        $c = file_get_contents($db_file);
+        if (preg_match("/\\\$db\\[\x27default\x27\\]\\[\x27database\x27\\]\s*=\s*\x27(.*?)\x27;/", $c, $m)) {
+            $db_name = $m[1];
+            echo "  -> Terkoneksi ke Database : $db_name\n";
+            
+            try {
+                $pdo = new PDO("mysql:host=db;port=3306;dbname=$db_name", "opensid", $db_pass);
+                $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                
+                $stmt = $pdo->query("SELECT nama_desa FROM config LIMIT 1");
+                $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                
+                if ($row && !empty($row["nama_desa"])) {
+                    echo "  -> Identitas Nama Desa    : " . $row["nama_desa"] . "\n";
+                } else {
+                    echo "  ❌ Tabel config kosong atau tidak ada data nama_desa!\n";
+                }
+            } catch (PDOException $e) {
+                echo "  ❌ Gagal koneksi ke database $db_name: " . $e->getMessage() . "\n";
+            }
+        } else {
+            echo "  ❌ String konfigurasi database tidak valid di database.php\n";
+        }
+    } else {
+        echo "  ❌ File config/database.php TIDAK ADA!\n";
+    }
+    echo "\n";
 }
 '
-
-echo "------------------------------------------------------"
-echo "[2] Memeriksa Konfigurasi Database di Tiap Desa..."
-echo "------------------------------------------------------"
-DB_PASS=$(docker exec opensid-db printenv MYSQL_ROOT_PASSWORD | tr -d '\r')
-
-# Loop folder desa di dalam container
-DESA_FOLDERS=$(docker exec opensid-app ls -1 /var/www/html | grep "^desa_")
-
-for DESA in $DESA_FOLDERS; do
-    echo "Folder: $DESA"
-    
-    # Ambil nama database dari file database.php
-    DB_NAME=$(docker exec opensid-app bash -c "grep \"\\\$db\['default'\]\['database'\]\" /var/www/html/$DESA/config/database.php | cut -d\"'\" -f4" || echo "")
-    
-    if [ -z "$DB_NAME" ]; then
-        echo "  ❌ Konfigurasi database TIDAK DITEMUKAN atau KOSONG!"
-        continue
-    fi
-    
-    echo "  -> Terkoneksi ke Database : $DB_NAME"
-    
-    # Ambil nama desa dari tabel config di dalam database tersebut
-    NAMA_DESA=$(docker exec opensid-db bash -c "mysql -u root -p\"$DB_PASS\" -D \"$DB_NAME\" -N -B -e \"SELECT nama_desa FROM config LIMIT 1;\" 2>/dev/null" || echo "")
-    
-    if [ -z "$NAMA_DESA" ]; then
-        echo "  ❌ Gagal membaca tabel config di database $DB_NAME. Apakah database belum di-import?"
-    else
-        echo "  -> Identitas Nama Desa    : $NAMA_DESA"
-        
-        # Peringatan jika masih memakai opensid (default)
-        if [ "$DB_NAME" == "opensid" ]; then
-            echo "  ⚠️ PERINGATAN: Desa ini masih menggunakan database default (opensid)!"
-        fi
-    fi
-    echo ""
-done
-
-echo "======================================================"
-echo "✅ DIAGNOSTIK SELESAI"
-echo "======================================================"

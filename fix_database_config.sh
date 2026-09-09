@@ -3,43 +3,44 @@ echo "======================================================"
 echo "  MEMBUAT & MEMPERBAIKI CONFIG DATABASE TIAP DESA"
 echo "======================================================"
 
-DESA_FOLDERS=$(docker exec opensid-app ls -1 /var/www/html | grep "^desa_")
-
-for DESA in $DESA_FOLDERS; do
-    echo "------------------------------------------------------"
-    echo "Memproses Folder: $DESA"
+docker exec opensid-app php -r '
+$folders = glob("/var/www/html/desa_*", GLOB_ONLYDIR);
+foreach($folders as $dir) {
+    $desa = basename($dir);
+    echo "Memproses: $desa\n";
     
-    DB_NAME="opensid_${DESA#desa_}"
-    echo "Target Database : $DB_NAME"
+    // Nama database = opensid_ + (nama setelah desa_)
+    $db_name = "opensid_" . substr($desa, 5);
+    echo "Target Database: $db_name\n";
     
-    # Buat folder config jika belum ada di dalam container
-    docker exec opensid-app mkdir -p /var/www/html/$DESA/config
+    $config_dir = $dir . "/config";
+    if (!is_dir($config_dir)) {
+        mkdir($config_dir, 0755, true);
+    }
     
-    # Cek apakah file database.php sudah ada
-    HAS_DB=$(docker exec opensid-app bash -c "[ -f /var/www/html/$DESA/config/database.php ] && echo 'yes' || echo 'no'")
-    
-    if [ "$HAS_DB" == "no" ]; then
-        echo "  -> File database.php TIDAK ADA. Membuat baru..."
+    $db_file = $config_dir . "/database.php";
+    if (!file_exists($db_file)) {
+        echo "  -> File database.php TIDAK ADA. Membuat baru...\n";
+        $content = "<?php\n// Pengaturan khusus untuk $desa\n\$db[\x27default\x27][\x27database\x27] = \x27$db_name\x27;\n";
+        file_put_contents($db_file, $content);
+        echo "  ✅ Berhasil dibuat!\n";
+    } else {
+        echo "  -> File database.php sudah ada. Memperbarui isinya...\n";
+        $c = file_get_contents($db_file);
         
-        # Buat file database.php baru dengan konfigurasi yang menunjuk ke database masing-masing
-        docker exec opensid-app bash -c "cat > /var/www/html/$DESA/config/database.php << 'EOF'
-<?php
-// Pengaturan khusus untuk $DESA
-\$db['default']['database'] = '$DB_NAME';
-EOF"
-        echo "  ✅ File database.php berhasil dibuat!"
-    else
-        echo "  -> File database.php sudah ada. Memperbarui isinya..."
+        // Cek apakah string literal $DB_NAME ada (akibat bug script sebelumnya)
+        if (strpos($c, "\x27\$DB_NAME\x27") !== false) {
+            $c = str_replace("\x27\$DB_NAME\x27", "\x27$db_name\x27", $c);
+        }
         
-        # Update nama database di file yang sudah ada
-        # Kita replace atau tambahkan
-        docker exec opensid-app bash -c "grep -q \"\\\$db\['default'\]\['database'\]\" /var/www/html/$DESA/config/database.php && sed -i \"s/\\\$db\['default'\]\['database'\].*/\\\$db['default']['database'] = '$DB_NAME';/g\" /var/www/html/$DESA/config/database.php || echo \"\\\$db['default']['database'] = '$DB_NAME';\" >> /var/www/html/$DESA/config/database.php"
-        
-        echo "  ✅ File database.php berhasil diperbarui!"
-    fi
-done
-
-echo "======================================================"
-echo "✅ SEMUA CONFIG DATABASE DESA BERHASIL DIPERBAIKI"
-echo "======================================================"
-echo "Silakan jalankan ulang 'bash check_all_db.sh' untuk memastikan."
+        // Update database configuration
+        if (preg_match("/\\\$db\\[\x27default\x27\\]\\[\x27database\x27\\]\s*=\s*\x27.*?\x27;/", $c)) {
+            $c = preg_replace("/\\\$db\\[\x27default\x27\\]\\[\x27database\x27\\]\s*=\s*\x27.*?\x27;/", "\$db[\x27default\x27][\x27database\x27] = \x27$db_name\x27;", $c);
+        } else {
+            $c .= "\n\$db[\x27default\x27][\x27database\x27] = \x27$db_name\x27;\n";
+        }
+        file_put_contents($db_file, $c);
+        echo "  ✅ Berhasil diperbarui!\n";
+    }
+}
+'
