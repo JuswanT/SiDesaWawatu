@@ -11,12 +11,20 @@ if ! docker ps | grep -q opensid-db; then
     exit 1
 fi
 
-echo "[1/3] Mengekspor data master dari database 'opensid'..."
-# Gunakan kredensial default dari .env (root / rahasia123)
-docker exec opensid-db mysqldump -u root -prahasia123 opensid > opensid_master.sql 2>/dev/null
+# Mengambil konfigurasi dari file .env
+if [ -f ".env" ]; then
+    export $(grep -v '^#' .env | xargs)
+fi
+
+DB_PASS=${DB_ROOT_PASSWORD:-rahasia123}
+DB_NAME=${DB_DATABASE:-opensid}
+
+echo "[1/3] Mengekspor data master dari database '$DB_NAME'..."
+docker exec opensid-db mysqldump -u root -p"$DB_PASS" "$DB_NAME" > opensid_master.sql
 
 if [ ! -s opensid_master.sql ]; then
-    echo "❌ Error: Gagal mengekspor database. Pastikan password root benar dan database 'opensid' masih ada."
+    echo "❌ Error: Gagal mengekspor database."
+    echo "Cek isi file .env Anda. Pastikan DB_ROOT_PASSWORD ($DB_PASS) dan DB_DATABASE ($DB_NAME) sudah benar."
     rm -f opensid_master.sql
     exit 1
 fi
@@ -27,10 +35,10 @@ buat_db() {
     echo "Mempersiapkan database: $dbname"
     
     # Buat database jika belum ada
-    docker exec opensid-db mysql -u root -prahasia123 -e "CREATE DATABASE IF NOT EXISTS $dbname CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;" 2>/dev/null
+    docker exec opensid-db mysql -u root -p"$DB_PASS" -e "CREATE DATABASE IF NOT EXISTS $dbname CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;" 2>/dev/null
     
     # Impor data master ke database baru
-    cat opensid_master.sql | docker exec -i opensid-db mysql -u root -prahasia123 $dbname 2>/dev/null
+    cat opensid_master.sql | docker exec -i opensid-db mysql -u root -p"$DB_PASS" $dbname 2>/dev/null
     
     echo "✅ Berhasil disalin ke $dbname."
 }
