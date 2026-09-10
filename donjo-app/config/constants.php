@@ -157,26 +157,11 @@ define('KEHADIRAN', 'kehadiran');
 /**
  * Custom path directory
  */
-// Menentukan direktori desa berdasarkan domain aktif (Multisite Support)
-$host = $_SERVER['HTTP_HOST'] ?? '';
-$desa_dir = 'desa'; // Default fallback
-
-// Gunakan pencocokan string persis atau str_ends_with agar tidak terjadi bug 
-// di mana "desamatawawatu" terdeteksi sebagai "desawawatu" karena mengandung kata yang sama.
-if (preg_match('/^desawawatu\.web\.id/i', $host)) {
-    $desa_dir = 'desa_wawatu';
-} elseif (preg_match('/^desamatawawatu\.web\.id/i', $host)) {
-    $desa_dir = 'desa_matawawatu';
-} elseif (preg_match('/^desatanjungtiram\.web\.id/i', $host)) {
-    $desa_dir = 'desa_tanjungtiram';
-} elseif (preg_match('/^lalowaru\.web\.id/i', $host)) {
-    $desa_dir = 'desa_lalowaru';
-}
-
-// Fallback to default 'desa' if the specific directory does not exist yet
-if (!is_dir(FCPATH . $desa_dir)) {
-    $desa_dir = 'desa';
-}
+// Dalam arsitektur Docker, setiap desa memiliki container terpisah.
+// Folder 'desa' di dalam container sudah di-mount ke folder desa masing-masing
+// melalui docker-compose.yml (contoh: ./desa_wawatu:/var/www/html/desa).
+// Oleh karena itu, cukup gunakan folder 'desa' sebagai default.
+$desa_dir = 'desa';
 
 define('DESA_DIR', $desa_dir . '/');
 define('DESAPATH', DESA_DIR);
